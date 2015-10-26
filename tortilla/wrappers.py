@@ -186,8 +186,8 @@ class Client(object):
         self._last_request_time = time.time()
 
         # when not silent, raise an exception for any status code >= 400
-        if not silent:
-            r.raise_for_status()
+        # if not silent:
+        #     r.raise_for_status()
 
         try:
             # parse the response into something nice
@@ -221,10 +221,7 @@ class Client(object):
                   status_code=r.status_code, reason=r.reason,
                   text=parsed_response)
 
-        # return our findings and try to make it a bit nicer
-        if has_body:
-            return bunchify(parsed_response)
-        return None
+        return r
 
 
 class Wrap(object):
