@@ -262,7 +262,6 @@ class Wrap(object):
             'format': format,
             'delay': delay,
         })
-        ipdb.set_trace()
 
     def url(self):
         if self._url:
