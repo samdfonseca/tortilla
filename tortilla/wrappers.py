@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import ipdb
 
 import os
 import time
@@ -66,11 +67,12 @@ if os.name == 'nt':
 class Client(object):
     """Wrapper around the most basic methods of the requests library."""
 
-    def __init__(self, debug=False, cache=None):
+    def __init__(self, debug=False, cache=None, silent=None):
         self.headers = Bunch()
         self.debug = debug
         self.cache = cache if cache else DictCache()
         self.cache = CacheWrapper(self.cache)
+        self.silent = silent or False
         self.session = requests.session()
         self._last_request_time = None
 
@@ -186,12 +188,16 @@ class Client(object):
         self._last_request_time = time.time()
 
         # when not silent, raise an exception for any status code >= 400
-        # if not silent:
-        #     r.raise_for_status()
+        # if silent == False or (silent is None and not self.silent):
+        if not silent:
+            # if silent is explicitely set to False, raise exception on error status code
+            # or
+            # if silent left as None and self.silent is False or None, raise exception on error status code
+            r.raise_for_status()
 
         try:
             # parse the response into something nice
-            has_body = len(r.text) > 0
+            has_body = len(r.text.strip()) > 0
             if not has_body:
                 parsed_response = 'No response'
             else:
@@ -245,6 +251,7 @@ class Wrap(object):
             self._part = str(part)
         self._url = None
         self._parent = parent or Client(debug=debug, cache=cache)
+        silent = self._parent.config['silent'] if parent else silent
         self.config = Bunch({
             'headers': bunchify(headers) if headers else Bunch(),
             'params': bunchify(params) if params else Bunch(),
@@ -255,6 +262,7 @@ class Wrap(object):
             'format': format,
             'delay': delay,
         })
+        ipdb.set_trace()
 
     def url(self):
         if self._url:
